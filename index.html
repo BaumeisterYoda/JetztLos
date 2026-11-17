@@ -1,0 +1,1125 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8">
+  <meta
+    name="viewport"
+    content="width=device-width, initial-scale=1, viewport-fit=cover"
+  >
+
+  <meta name="theme-color" content="#111827">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta
+    name="apple-mobile-web-app-status-bar-style"
+    content="black-translucent"
+  >
+
+  <title>Jetzt los – Linie 36</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --background: #07101f;
+      --surface: #111c2e;
+      --surface-light: #17253b;
+      --text: #f8fafc;
+      --muted: #a9b6c8;
+      --green: #22c55e;
+      --orange: #f59e0b;
+      --red: #ef4444;
+      --blue: #38bdf8;
+      --border: rgba(255, 255, 255, 0.1);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      min-height: 100%;
+      margin: 0;
+    }
+
+    body {
+      background:
+        radial-gradient(circle at top, #15345b 0, var(--background) 45%);
+      color: var(--text);
+      font-family:
+        system-ui,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
+    }
+
+    button,
+    input {
+      font: inherit;
+    }
+
+    .app {
+      width: min(100%, 760px);
+      margin: 0 auto;
+      padding:
+        max(18px, env(safe-area-inset-top))
+        16px
+        max(28px, env(safe-area-inset-bottom));
+    }
+
+    .header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 14px;
+      margin-bottom: 16px;
+    }
+
+    .station {
+      margin: 0;
+      font-size: clamp(1.9rem, 8vw, 3.5rem);
+      line-height: 1;
+      letter-spacing: -0.04em;
+    }
+
+    .subtitle {
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    .clock {
+      flex: none;
+      font-variant-numeric: tabular-nums;
+      font-size: clamp(1.3rem, 5vw, 2rem);
+      font-weight: 800;
+    }
+
+    .status-card {
+      min-height: 250px;
+      display: grid;
+      place-items: center;
+      padding: 28px 18px;
+      border: 1px solid var(--border);
+      border-radius: 26px;
+      background: rgba(17, 28, 46, 0.92);
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.28);
+      text-align: center;
+    }
+
+    .status-card.status-wait {
+      border-color: rgba(34, 197, 94, 0.7);
+      box-shadow:
+        0 0 0 1px rgba(34, 197, 94, 0.18),
+        0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .status-card.status-go {
+      border-color: rgba(245, 158, 11, 0.88);
+      box-shadow:
+        0 0 30px rgba(245, 158, 11, 0.18),
+        0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .status-card.status-late {
+      border-color: rgba(239, 68, 68, 0.85);
+      box-shadow:
+        0 0 30px rgba(239, 68, 68, 0.16),
+        0 20px 60px rgba(0, 0, 0, 0.28);
+    }
+
+    .status-symbol {
+      font-size: 2.8rem;
+      line-height: 1;
+    }
+
+    .status-title {
+      margin: 12px 0 4px;
+      font-size: clamp(2.1rem, 10vw, 5rem);
+      line-height: 0.98;
+      letter-spacing: -0.05em;
+    }
+
+    .status-description {
+      margin: 12px 0 0;
+      color: var(--muted);
+      font-size: clamp(1rem, 4vw, 1.35rem);
+    }
+
+    .primary-departure {
+      margin-top: 22px;
+      font-size: clamp(1.2rem, 5vw, 1.7rem);
+      font-weight: 800;
+    }
+
+    .departure-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .departure {
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      align-items: center;
+      gap: 12px;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      background: rgba(17, 28, 46, 0.88);
+    }
+
+    .line-badge {
+      display: grid;
+      width: 50px;
+      height: 50px;
+      place-items: center;
+      border-radius: 12px;
+      background: #e11d48;
+      color: white;
+      font-size: 1.25rem;
+      font-weight: 900;
+    }
+
+    .departure-main {
+      min-width: 0;
+    }
+
+    .destination {
+      overflow: hidden;
+      font-size: 1.05rem;
+      font-weight: 750;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .departure-times {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    .minutes {
+      text-align: right;
+      font-size: 1.55rem;
+      font-weight: 900;
+      white-space: nowrap;
+    }
+
+    .delay {
+      color: var(--orange);
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .button {
+      flex: 1;
+      min-width: 140px;
+      padding: 13px 16px;
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      background: var(--surface-light);
+      color: var(--text);
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .button-primary {
+      background: var(--blue);
+      color: #00111c;
+    }
+
+    .button:focus-visible,
+    input:focus-visible,
+    summary:focus-visible {
+      outline: 3px solid var(--blue);
+      outline-offset: 3px;
+    }
+
+    details {
+      margin-top: 16px;
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      background: rgba(17, 28, 46, 0.84);
+    }
+
+    summary {
+      padding: 15px;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    .settings {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+      padding: 0 15px 15px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    input {
+      width: 100%;
+      padding: 11px;
+      border: 1px solid var(--border);
+      border-radius: 11px;
+      background: #081426;
+      color: var(--text);
+    }
+
+    .technical-status {
+      min-height: 1.3em;
+      margin: 14px 2px 0;
+      color: var(--muted);
+      font-size: 0.87rem;
+      text-align: center;
+    }
+
+    .technical-status.error {
+      color: #fca5a5;
+    }
+
+    .loading {
+      animation: pulse 1.2s infinite;
+    }
+
+    @keyframes pulse {
+      50% {
+        opacity: 0.55;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .header {
+        align-items: center;
+      }
+
+      .settings {
+        grid-template-columns: 1fr;
+      }
+
+      .status-card {
+        min-height: 225px;
+      }
+    }
+
+    @media (min-width: 700px) {
+      .app {
+        padding-top: 30px;
+      }
+
+      .departure {
+        padding: 18px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="app">
+    <header class="header">
+      <div>
+        <h1 class="station">Harmoniestr.</h1>
+        <p class="subtitle">Linie 36 · persönliche Abfahrtsanzeige</p>
+      </div>
+
+      <div id="clock" class="clock">--:--</div>
+    </header>
+
+    <section
+      id="statusCard"
+      class="status-card"
+      aria-live="polite"
+    >
+      <div>
+        <div id="statusSymbol" class="status-symbol">●</div>
+        <h2 id="statusTitle" class="status-title loading">
+          Lade Abfahrten
+        </h2>
+        <p id="statusDescription" class="status-description">
+          Verbindung zur PULS-API wird hergestellt.
+        </p>
+        <div id="primaryDeparture" class="primary-departure"></div>
+      </div>
+    </section>
+
+    <section
+      id="departureList"
+      class="departure-list"
+      aria-label="Nächste Abfahrten"
+    ></section>
+
+    <div class="toolbar">
+      <button
+        id="refreshButton"
+        class="button button-primary"
+        type="button"
+      >
+        Jetzt aktualisieren
+      </button>
+
+      <button
+        id="fullScreenButton"
+        class="button"
+        type="button"
+      >
+        Vollbild
+      </button>
+    </div>
+
+    <details>
+      <summary>Einstellungen</summary>
+
+      <div class="settings">
+        <label>
+          Fußweg zur Haltestelle in Minuten
+          <input
+            id="walkMinutes"
+            type="number"
+            min="0"
+            max="60"
+            step="1"
+            value="4"
+          >
+        </label>
+
+        <label>
+          Sicherheitspuffer in Minuten
+          <input
+            id="bufferMinutes"
+            type="number"
+            min="0"
+            max="30"
+            step="1"
+            value="2"
+          >
+        </label>
+      </div>
+    </details>
+
+    <p id="technicalStatus" class="technical-status">
+      Noch nicht aktualisiert
+    </p>
+  </main>
+
+  <script>
+    (() => {
+      "use strict";
+
+      const CONFIG = {
+        apiUrl:
+          "https://start.vag.de/dm/api/v1/abfahrten/VAG/HARMON/36" +
+          "?product=Bus&timespan=60&limitcount=10",
+
+        line: "36",
+        station: "Harmoniestr.",
+        refreshIntervalMs: 20000,
+        imminentLimitSeconds: 90
+      };
+
+      const elements = {
+        clock: document.getElementById("clock"),
+        statusCard: document.getElementById("statusCard"),
+        statusSymbol: document.getElementById("statusSymbol"),
+        statusTitle: document.getElementById("statusTitle"),
+        statusDescription:
+          document.getElementById("statusDescription"),
+        primaryDeparture:
+          document.getElementById("primaryDeparture"),
+        departureList:
+          document.getElementById("departureList"),
+        refreshButton:
+          document.getElementById("refreshButton"),
+        fullScreenButton:
+          document.getElementById("fullScreenButton"),
+        walkMinutes:
+          document.getElementById("walkMinutes"),
+        bufferMinutes:
+          document.getElementById("bufferMinutes"),
+        technicalStatus:
+          document.getElementById("technicalStatus")
+      };
+
+      let departures = [];
+      let refreshTimer = null;
+      let loading = false;
+
+      function clampNumber(value, minimum, maximum, fallback) {
+        const parsed = Number(value);
+
+        if (!Number.isFinite(parsed)) {
+          return fallback;
+        }
+
+        return Math.min(maximum, Math.max(minimum, parsed));
+      }
+
+      function getSettings() {
+        const walkMinutes = clampNumber(
+          elements.walkMinutes.value,
+          0,
+          60,
+          4
+        );
+
+        const bufferMinutes = clampNumber(
+          elements.bufferMinutes.value,
+          0,
+          30,
+          2
+        );
+
+        elements.walkMinutes.value = String(walkMinutes);
+        elements.bufferMinutes.value = String(bufferMinutes);
+
+        return {
+          walkMinutes,
+          bufferMinutes,
+          requiredMinutes: walkMinutes + bufferMinutes
+        };
+      }
+
+      function updateClock() {
+        elements.clock.textContent =
+          new Intl.DateTimeFormat("de-DE", {
+            hour: "2-digit",
+            minute: "2-digit",
+            second: "2-digit"
+          }).format(new Date());
+      }
+
+      function firstDefined(object, keys) {
+        for (const key of keys) {
+          if (
+            object &&
+            Object.prototype.hasOwnProperty.call(object, key) &&
+            object[key] !== null &&
+            object[key] !== undefined &&
+            object[key] !== ""
+          ) {
+            return object[key];
+          }
+        }
+
+        return null;
+      }
+
+      function findDepartureArray(data) {
+        const likelyKeys = [
+          "Abfahrten",
+          "abfahrten",
+          "Departures",
+          "departures"
+        ];
+
+        for (const key of likelyKeys) {
+          if (Array.isArray(data?.[key])) {
+            return data[key];
+          }
+        }
+
+        for (const value of Object.values(data || {})) {
+          if (Array.isArray(value)) {
+            return value;
+          }
+        }
+
+        return [];
+      }
+
+      function parseApiDate(value) {
+        if (!value) {
+          return null;
+        }
+
+        if (value instanceof Date) {
+          return Number.isNaN(value.getTime()) ? null : value;
+        }
+
+        if (typeof value === "number") {
+          const date = new Date(value);
+          return Number.isNaN(date.getTime()) ? null : date;
+        }
+
+        const text = String(value).trim();
+
+        const directDate = new Date(text);
+
+        if (!Number.isNaN(directDate.getTime())) {
+          return directDate;
+        }
+
+        const germanMatch = text.match(
+          /^(\d{2})\.(\d{2})\.(\d{4})[ T](\d{2}):(\d{2})(?::(\d{2}))?$/
+        );
+
+        if (germanMatch) {
+          return new Date(
+            Number(germanMatch[3]),
+            Number(germanMatch[2]) - 1,
+            Number(germanMatch[1]),
+            Number(germanMatch[4]),
+            Number(germanMatch[5]),
+            Number(germanMatch[6] || 0)
+          );
+        }
+
+        const timeOnlyMatch = text.match(
+          /^(\d{1,2}):(\d{2})(?::(\d{2}))?$/
+        );
+
+        if (timeOnlyMatch) {
+          const date = new Date();
+          date.setHours(
+            Number(timeOnlyMatch[1]),
+            Number(timeOnlyMatch[2]),
+            Number(timeOnlyMatch[3] || 0),
+            0
+          );
+
+          return date;
+        }
+
+        return null;
+      }
+
+      function normalizeDeparture(raw) {
+        const predictedValue = firstDefined(raw, [
+          "AbfahrtszeitIst",
+          "abfahrtszeitIst",
+          "AbfahrtIst",
+          "abfahrtIst",
+          "IstAbfahrt",
+          "istAbfahrt",
+          "Prognosezeit",
+          "prognosezeit"
+        ]);
+
+        const scheduledValue = firstDefined(raw, [
+          "AbfahrtszeitSoll",
+          "abfahrtszeitSoll",
+          "AbfahrtSoll",
+          "abfahrtSoll",
+          "SollAbfahrt",
+          "sollAbfahrt",
+          "Abfahrtszeit",
+          "abfahrtszeit"
+        ]);
+
+        const predictedDate = parseApiDate(predictedValue);
+        const scheduledDate = parseApiDate(scheduledValue);
+        const effectiveDate = predictedDate || scheduledDate;
+
+        if (!effectiveDate) {
+          return null;
+        }
+
+        const destination =
+          firstDefined(raw, [
+            "Richtungstext",
+            "richtungstext",
+            "Richtung",
+            "richtung",
+            "Endhaltestelle",
+            "endhaltestelle",
+            "Ziel",
+            "ziel"
+          ]) || "Richtung unbekannt";
+
+        const line =
+          firstDefined(raw, [
+            "Linienname",
+            "linienname",
+            "Linie",
+            "linie"
+          ]) || CONFIG.line;
+
+        const tripNumber = firstDefined(raw, [
+          "Fahrtnummer",
+          "fahrtnummer"
+        ]);
+
+        const delaySeconds =
+          predictedDate && scheduledDate
+            ? Math.round(
+                (predictedDate.getTime() -
+                  scheduledDate.getTime()) / 1000
+              )
+            : null;
+
+        return {
+          line: String(line),
+          destination: String(destination),
+          tripNumber,
+          scheduledDate,
+          predictedDate,
+          effectiveDate,
+          delaySeconds,
+          raw
+        };
+      }
+
+      function formatTime(date) {
+        if (!date) {
+          return "--:--";
+        }
+
+        return new Intl.DateTimeFormat("de-DE", {
+          hour: "2-digit",
+          minute: "2-digit"
+        }).format(date);
+      }
+
+      function formatDelay(delaySeconds) {
+        if (
+          delaySeconds === null ||
+          !Number.isFinite(delaySeconds)
+        ) {
+          return "";
+        }
+
+        const delayMinutes = Math.round(delaySeconds / 60);
+
+        if (delayMinutes === 0) {
+          return "pünktlich";
+        }
+
+        if (delayMinutes > 0) {
+          return `+${delayMinutes} min`;
+        }
+
+        return `${delayMinutes} min`;
+      }
+
+      function minutesUntil(date) {
+        return Math.ceil(
+          (date.getTime() - Date.now()) / 60000
+        );
+      }
+
+      function setTechnicalStatus(message, isError = false) {
+        elements.calStatus.textContent = message;
+        elements.technicalStatus.classList.toggle(
+          "error",
+          isError
+        );
+      }
+
+      function setMainStatus({
+        mode,
+        symbol,
+        title,
+        description,
+        departureText
+      }) {
+        elements.statusCard.className =
+          `status-card status-${mode}`;
+
+        elements.statusSymbol.textContent = symbol;
+        elements.statusTitle.textContent = title;
+        elements.statusTitle.classList.remove("loading");
+        elements.statusDescription.textContent = description;
+        elements.primaryDeparture.textContent =
+          departureText || "";
+      }
+
+      function chooseReachableDeparture() {
+        const settings = getSettings();
+        const requiredMs =
+          settings.requiredMinutes * 60 * 1000;
+
+        return departures.find((departure) => {
+          return (
+            departure.effectiveDate.getTime() -
+              Date.now() >=
+            requiredMs
+          );
+        }) || null;
+      }
+
+      function updateMainStatus() {
+        const settings = getSettings();
+
+        if (departures.length === 0) {
+          setMainStatus({
+            mode: "late",
+            symbol: "!",
+            title: "Keine Abfahrt",
+            description:
+              "Im abgerufenen Zeitraum wurde keine verwertbare Abfahrt gefunden.",
+            departureText: ""
+          });
+
+          return;
+        }
+
+        const nextDeparture = departures[0];
+        const reachableDeparture = chooseReachableDeparture();
+
+        if (!reachableDeparture) {
+          setMainStatus({
+            mode: "late",
+            symbol: "×",
+            title: "Keine erreichbar",
+            description:
+              "Die gefundenen Abfahrten liegen zu nah. Bitte aktualisieren.",
+            departureText: ""
+          });
+
+          return;
+        }
+
+        const secondsUntilDeparture =
+          (reachableDeparture.effectiveDate.getTime() -
+            Date.now()) / 1000;
+
+        const secondsUntilLeaving =
+          secondsUntilDeparture -
+          settings.requiredMinutes * 60;
+
+        const departureTime =
+          formatTime(reachableDeparture.effectiveDate);
+
+        const departureText =
+          `Linie ${reachableDeparture.line} nach ` +
+          `${reachableDeparture.destination} · ${departureTime} Uhr`;
+
+        if (secondsUntilLeaving <= 0) {
+          setMainStatus({
+            mode: "go",
+            symbol: "➜",
+            title: "JETZT LOS",
+            description:
+              `${settings.walkMinutes} min Fußweg + ` +
+              `${settings.bufferMinutes} min Puffer`,
+            departureText
+          });
+
+          return;
+        }
+
+        if (
+          secondsUntilLeaving <=
+          CONFIG.imminentLimitSeconds
+        ) {
+          setMainStatus({
+            mode: "go",
+            symbol: "➜",
+            title: "Gleich los",
+            description:
+              `In ${Math.max(
+                1,
+                Math.ceil(secondsUntilLeaving / 60)
+              )} Minute losgehen`,
+            departureText
+          });
+
+          return;
+        }
+
+        const leaveMinutes =
+          Math.ceil(secondsUntilLeaving / 60);
+
+        setMainStatus({
+          mode: "wait",
+          symbol: "✓",
+          title: `In ${leaveMinutes} min los`,
+          description:
+            `Geplante Gehzeit einschließlich Puffer: ` +
+            `${settings.requiredMinutes} Minuten`,
+          departureText
+        });
+
+        if (
+          nextDeparture !== reachableDeparture &&
+          minutesUntil(nextDeparture.effectiveDate) > 0
+        ) {
+          elements.statusDescription.textContent +=
+            ". Die vorherige Fahrt ist nicht mehr sicher erreichbar.";
+        }
+      }
+
+      function renderDepartures() {
+        elements.departureList.replaceChildren();
+
+        for (const departure of departures.slice(0, 3)) {
+          const row = document.createElement("article");
+          row.className = "departure";
+
+          const badge = document.createElement("div");
+          badge.className = "line-badge";
+          badge.textContent = departure.line;
+
+          const main = document.createElement("div");
+          main.className = "departure-main";
+
+          const destination = document.createElement("div");
+          destination.className = "destination";
+          destination.textContent = departure.destination;
+
+          const times = document.createElement("div");
+          times.className = "departure-times";
+
+          const scheduledText = departure.scheduledDate
+            ? `Soll ${formatTime(departure.scheduledDate)}`
+            : "";
+
+          const predictedText = departure.predictedDate
+            ? `Prognose ${formatTime(departure.predictedDate)}`
+            : "";
+
+          const delayText = formatDelay(
+            departure.delaySeconds
+          );
+
+          times.textContent = [
+            scheduledText,
+            predictedText,
+            delayText
+          ].filter(Boolean).join(" · ");
+
+          if (
+            departure.delaySeconds !== null &&
+            departure.delaySeconds >= 60
+          ) {
+            times.classList.add("delay");
+          }
+
+          main.append(destination, times);
+
+          const minutes = document.createElement("div");
+          minutes.className = "minutes";
+
+          const remaining =
+            minutesUntil(departure.effectiveDate);
+
+          minutes.textContent =
+            remaining <= 0
+              ? "jetzt"
+              : `${remaining} min`;
+
+          row.append(badge, main, minutes);
+          elements.departureList.append(row);
+        }
+      }
+
+      function render() {
+        departures = departures
+          .filter((departure) => {
+            return (
+              departure.effectiveDate.getTime() >
+              Date.now() - 60000
+            );
+          })
+          .sort((a, b) => {
+            return (
+              a.effectiveDate.getTime() -
+              b.effectiveDate.getTime()
+            );
+          });
+
+        updateMainStatus();
+        renderDepartures();
+      }
+
+      async function loadDepartures() {
+        if (loading) {
+          return;
+        }
+
+        loading = true;
+        elements.refreshButton.disabled = true;
+        elements.refreshButton.textContent = "Aktualisiere …";
+
+        setTechnicalStatus("PULS-Daten werden abgerufen …");
+
+        try {
+          const response = await fetch(
+            CONFIG.apiUrl,
+            {
+              method: "GET",
+              cache: "no-store",
+              headers: {
+                "Accept": "application/json"
+              }
+            }
+          );
+
+          if (!response.ok) {
+            throw new Error(
+              `HTTP ${response.status}`
+            );
+          }
+
+          const data = await response.json();
+          const rawDepartures = findDepartureArray(data);
+
+          departures = rawDepartures
+            .map(normalizeDeparture)
+            .filter(Boolean)
+            .filter((departure) => {
+              return (
+                departure.line === CONFIG.line &&
+                departure.effectiveDate.getTime() >
+                  Date.now() - 60000
+              );
+            })
+            .sort((a, b) => {
+              return (
+                a.effectiveDate.getTime() -
+                b.effectiveDate.getTime()
+              );
+            });
+
+          render();
+
+          const updateTime =
+            new Intl.DateTimeFormat("de-DE", {
+              hour: "2-digit",
+              minute: "2-digit",
+              second: "2-digit"
+            }).format(new Date());
+
+          setTechnicalStatus(
+            `Aktualisiert um ${updateTime} Uhr · ` +
+            `${departures.length} Abfahrten gefunden`
+          );
+        } catch (error) {
+          console.error(error);
+
+          setMainStatus({
+            mode: "late",
+            symbol: "!",
+            title: "Keine Verbindung",
+            description:
+              "Die PULS-Daten konnten nicht geladen werden.",
+            departureText: ""
+          });
+
+          setTechnicalStatus(
+            `Fehler: ${error.message}. ` +
+            "Möglicherweise blockiert die API den Browserzugriff.",
+            true
+          );
+        } finally {
+          loading = false;
+          elements.refreshButton.disabled = false;
+          elements.refreshButton.textContent =
+            "Jetzt aktualisieren";
+        }
+      }
+
+      function saveSettings() {
+        const settings = getSettings();
+
+        localStorage.setItem(
+          "jetztLosSettings",
+          JSON.stringify(settings)
+        );
+
+        render();
+      }
+
+      function restoreSettings() {
+        try {
+          const stored = JSON.parse(
+            localStorage.getItem("jetztLosSettings")
+          );
+
+          if (!stored) {
+            return;
+          }
+
+          elements.walkMinutes.value = String(
+            clampNumber(stored.walkMinutes, 0, 60, 4)
+          );
+
+          elements.bufferMinutes.value = String(
+            clampNumber(stored.bufferMinutes, 0, 30, 2)
+          );
+        } catch {
+          localStorage.removeItem("jetztLosSettings");
+        }
+      }
+
+      async function enterFullScreen() {
+        try {
+          if (!document.fullscreenElement) {
+            await document.documentElement.requestFullscreen();
+            elements.fullScreenButton.textContent =
+              "Vollbild verlassen";
+          } else {
+            await document.exitFullscreen();
+            elements.fullScreenButton.textContent =
+              "Vollbild";
+          }
+        } catch {
+          setTechnicalStatus(
+            "Der Browser unterstützt den Vollbildmodus hier nicht.",
+            true
+          );
+        }
+      }
+
+      elements.refreshButton.addEventListener(
+        "click",
+        loadDepartures
+      );
+
+      elements.fullScreenButton.addEventListener(
+        "click",
+        enterFullScreen
+      );
+
+      elements.walkMinutes.addEventListener(
+        "change",
+        saveSettings
+      );
+
+      elements.bufferMinutes.addEventListener(
+        "change",
+        saveSettings
+      );
+
+      document.addEventListener(
+        "visibilitychange",
+        () => {
+          if (!document.hidden) {
+            loadDepartures();
+          }
+        }
+      );
+
+      window.addEventListener("focus", loadDepartures);
+
+      updateClock();
+      setInterval(updateClock, 1000);
+
+      setInterval(() => {
+        if (departures.length > 0) {
+          render();
+        }
+      }, 10000);
+
+      restoreSettings();
+      loadDepartures();
+
+      refreshTimer = setInterval(
+        loadDepartures,
+        CONFIG.refreshIntervalMs
+      );
+    })();
+  </script>
+</body>
+</html>
